@@ -6,15 +6,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 import cfpack as cfp
+from cfpack.defaults import *
+import numpy as np
 
 # Argument parser setup
 parser = argparse.ArgumentParser(description="Plot different quantities from simulation data.")
-parser.add_argument("-v", "--variable", required=True, help="Variable to plot")
+var_choices = ["escapes", "histo", "energy"]
+parser.add_argument("-v", "--variable", choices=var_choices, required=True, help="Variable to plot")
 # Parse the command-line arguments
 args = parser.parse_args()
 
-
-file_path = "../PHYS2020SimProj/simulation_results.xlsx"
+file_path = "../PHYS2020SimProj/SimResults/simulation_results_50_50000.xlsx"
 cfp.print('Reading:'+file_path,color='green')
 xls = pd.ExcelFile(file_path)
 
@@ -36,8 +38,12 @@ if args.variable == 'energy':
 
 if args.variable == 'escapes':
     # Plotting Number of Escaped Particles vs Time
-    cfp.plot(x=df_main['Time'], y=30-df_main['Escaped Particles'], xlabel="Time", ylabel="Escaped Particles", label='Cumulative Escaped Particles', color='green')
-    plt.show()
+    tau = 1 / (0.5 * ((0.5)*50/ 100) * np.sqrt((8 * 1 * 500000) / (np.pi * 1)))
+    t = np.linspace(0, 0.5, 500)
+    N_t = 50*np.exp(-t / tau)
+    cfp.plot(x=t,y=N_t)
+    cfp.plot(x=df_main['Time'], y=50-df_main['Escaped Particles'], xlabel="Time",
+              ylabel="Escaped Particles", show=True)
 if args.variable == 'histo':
     # Optional: Histogram of Escape Times
     plt.figure(figsize=(10, 6))

@@ -25,7 +25,7 @@ v0 = np.sqrt(k * T / m)
 radius = 0.15
 current_time = 0.0
 dt = 1e-5
-steps = 10000
+steps = 50000
 
 escaped = np.zeros(N, dtype=bool)
 escape_times = []
@@ -178,8 +178,15 @@ def update(frame):
     return scat, time_text, escape_text
 
 ani = animation.FuncAnimation(fig, update, frames=steps, interval=0.1, blit=False)
-ani.save(out_path+"escaped_particles.mp4", writer="ffmpeg", fps=30)
+ani.save(out_path+f"escaped_particles_{N}_{steps}.mp4", writer="ffmpeg", fps=30)
 
+constants = {
+    'Parameter': ['N (particles)', 'T (K)', 'm (mass)', 'k (Boltzmann constant)', 
+                  'Box Width (W)', 'Box Height (H)', 'Hole Height', 'Time Step (dt)', 
+                  'Steps', 'Initial Speed v0', 'Particle Radius'],
+    'Value': [N, T, m, k, W, H, hole_height, dt, steps, v0, radius]
+}
+df_constants = pd.DataFrame(constants)
 
 # Main simulation data
 df_main = pd.DataFrame({
@@ -194,6 +201,7 @@ df_main = pd.DataFrame({
 df_escape = pd.DataFrame({'Escape Time': escape_times})
 
 # Save both to an Excel file with two sheets
-with pd.ExcelWriter(out_path+"simulation_results.xlsx", engine='xlsxwriter') as writer:
+with pd.ExcelWriter(out_path+"simulation_results_{N}_{steps}.xlsx", engine='xlsxwriter') as writer:
     df_main.to_excel(writer, sheet_name='Simulation Data', index=False)
     df_escape.to_excel(writer, sheet_name='Escape Times', index=False)
+    df_constants.to_excel(writer, sheet_name='Simulation Parameters', index=False)
